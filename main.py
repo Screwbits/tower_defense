@@ -18,7 +18,7 @@ def main():
     # This is responsible for dealing with textures and images
     enemy_image = pygame.image.load('assets/images/enemies/enemy1.png').convert_alpha()
     map_image = pygame.image.load('levels/level.png').convert_alpha()
-    currsor_turret = pygame.image.load('assets/images/turret/currsor_turret.png').convert_alpha()
+    currsor_turret = pygame.image.load('assets/images/turrets/currsor_turret.png').convert_alpha()
 
     # Load json data into level
     with open('level/level.tmj') as file:
