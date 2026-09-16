@@ -6,9 +6,6 @@ from constants import *
 from world import World
 from turret import Turret
 
-# NOTE: fix the path finding in the world.py file (or just redo the assets)
-
-
 
 def main():
     # This is the intialization phase
@@ -20,13 +17,13 @@ def main():
     pygame.display.set_caption("Tower Defense")
 
     # This is responsible for dealing with textures and images
-    map_image = pygame.image.load('levels/level.png').convert_alpha()
+    map_image = pygame.image.load('levels/level1.png').convert_alpha()
     currsor_turret = pygame.image.load('assets/images/turrets/currsor_turret.png').convert_alpha()
     enemy_image = pygame.image.load('assets/images/enemies/enemy1.png').convert_alpha()
     
 
     # Load json data into level
-    with open('levels/level.tmj') as file:
+    with open('levels/level1.tmj') as file:
         world_data = json.load(file)
 
     def create_turret(mouse_pos):
@@ -35,7 +32,7 @@ def main():
         # Calculate sequential number of tiles
         mouse_tile_num = (mouse_tile_y * COLS) + mouse_tile_x
         # check if tile is grass
-        if world.tile_map[mouse_tile_num] != 8:
+        if world.tile_map[mouse_tile_num] != 5:
             # Check for redunant turrets at tile
             space_is_free = True
             for turret in turret_group:
@@ -56,7 +53,6 @@ def main():
     turret_group = pygame.sprite.Group()
     enemy = Enemy(world.waypoints, enemy_image)
     enemy_group.add(enemy)
-    print(world.waypoints)
 
     # This will be the game Loop
     while True:

@@ -1,4 +1,5 @@
 import pygame
+import constants as c
 
 class World():
     def __init__(self, data, map_image):
@@ -10,7 +11,7 @@ class World():
     def process_data(self):
 		# Look through data to extract relevant info
         for layer in self.level_data["layers"]:
-            if layer["name"] == "Tile Layer 1":
+            if layer["name"] == "tilemap_1":
                 self.tile_map = layer["data"]
             elif layer["name"] == "waypoints":
                 for obj in layer["objects"]:
@@ -20,8 +21,8 @@ class World():
     def process_waypoints(self, data):
 		# Iterate through data to extract x and y coordinates
         for point in data:
-            temp_x = point.get("x")
-            temp_y = point.get("y")
+            temp_x = point.get("x") + c.TILE_SIZE * c.COLS
+            temp_y = point.get("y") + (c.TILE_SIZE + (c.TILE_SIZE / 2))
             self.waypoints.append((temp_x, temp_y))
 
 

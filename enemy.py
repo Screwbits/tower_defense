@@ -45,7 +45,7 @@ class Enemy(pygame.sprite.Sprite):
 		# calculate distance to next waypoint
         dist = self.target - self.pos
 		# use distance to calculate
-        self.angle = math.degrees(math.atan2(dist[1], dist[0]))
+        self.angle = math.degrees(math.atan2(-dist[1], dist[0]))
 		# rotate image and update rectangle
         self.image = pygame.transform.rotate(self.original_image, self.angle)
         self.rect = self.image.get_rect()
