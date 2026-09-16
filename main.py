@@ -5,6 +5,7 @@ from enemy import Enemy
 from constants import *
 from world import World
 from turret import Turret
+from button import Button
 
 
 def main():
@@ -13,13 +14,21 @@ def main():
     clock = pygame.time.Clock() # Calculating FPS using the computers clock
     
     # This is for the display to view the game through
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HIGHT))
+    screen = pygame.display.set_mode((SCREEN_WIDTH + SIDE_PANEL, SCREEN_HIGHT))
     pygame.display.set_caption("Tower Defense")
+
+    # Game Variables
+    placing_turrets = False
 
     # This is responsible for dealing with textures and images
     map_image = pygame.image.load('levels/level1.png').convert_alpha()
+    # individual turrets image for mouse cursor
     currsor_turret = pygame.image.load('assets/images/turrets/currsor_turret.png').convert_alpha()
+    # enemys
     enemy_image = pygame.image.load('assets/images/enemies/enemy1.png').convert_alpha()
+    # The buttons to work the turrets
+    buy_turret_image = pygame.image.load('assets/images/buttons/buy_button.png').convert_alpha()
+    cancel_image = pygame.image.load('assets/images/buttons/cancel_button.png').convert_alpha()
     
 
     # Load json data into level
@@ -54,21 +63,49 @@ def main():
     enemy = Enemy(world.waypoints, enemy_image)
     enemy_group.add(enemy)
 
+    # Create the Buttons
+    turret_button = Button(SCREEN_WIDTH + 30, 120, buy_turret_image, True)
+    cancel_button = Button(SCREEN_WIDTH + 50, 180, cancel_image, True)
+
+
     # This will be the game Loop
     while True:
         clock.tick(FPS)
 
-        # Background rendered first
-        screen.fill((1, 100, 3))
-        world.draw(screen) # put after screen.fill()
-        pygame.draw.lines(screen, "grey0", False, world.waypoints)
+        #################################
+        # UPDATING SECTION
+        #################################
 
-        # Update groups
+         # Update groups
         enemy_group.update()
+
+        #################################
+        # DRAWING SECTION
+        #################################
+
+        screen.fill((1, 0, 200))
+
+        # Background rendered first
+        world.draw(screen) # put after screen.fill()
 
         # Draws groups
         enemy_group.draw(screen)
         turret_group.draw(screen)
+
+        # Draw buttons
+        if turret_button.draw(screen): # Button to buy the turrets
+            placing_turrets = True
+        
+        # Shows cancel button only if buy turret has been clicked
+        if placing_turrets == True:
+            # Show currsor turret
+            currsor_rect = currsor_turret.get_rect()
+            currsor_pos = pygame.mouse.get_pos()
+            currsor_rect.center = currsor_pos
+            if currsor_pos[0] <= SCREEN_WIDTH:
+                screen.blit(currsor_turret, currsor_rect)
+            if cancel_button.draw(screen): # Button to stop buying
+                placing_turrets = False
 
         # Accounts for events that happen in game
         for event in pygame.event.get():
@@ -79,7 +116,8 @@ def main():
                 mouse_pos = pygame.mouse.get_pos()
                 # check if mouse is in the game area
                 if mouse_pos[0] < SCREEN_WIDTH and mouse_pos[0] < SCREEN_HIGHT:
-                    create_turret(mouse_pos)
+                    if placing_turrets == True:
+                        create_turret(mouse_pos)
         
 
         # Rerenders above to screen at 60 FPS (Adjustable FPS)
