@@ -19,9 +19,12 @@ def main():
 
     # Game Variables
     placing_turrets = False
+    selected_turret = None
 
     # This is responsible for dealing with textures and images
     map_image = pygame.image.load('levels/level1.png').convert_alpha()
+    # Turret Sprite Sheets
+    turret_sheet = pygame.image.load('assets/images/turrets/turret1.png').convert_alpha()
     # individual turrets image for mouse cursor
     currsor_turret = pygame.image.load('assets/images/turrets/currsor_turret.png').convert_alpha()
     # enemys
@@ -48,9 +51,19 @@ def main():
                 if (mouse_tile_x, mouse_tile_y) == (turret.tile_x, turret.tile_y):
                     space_is_free = False
             if space_is_free == True:
-                new_turret = Turret(currsor_turret, mouse_tile_x, mouse_tile_y)
+                new_turret = Turret(turret_sheet, mouse_tile_x, mouse_tile_y)
                 turret_group.add(new_turret)
 
+    def selected_turret(mouse_pos):
+        mouse_tile_x = mouse_pos[0] // TILE_SIZE
+        mouse_tile_y = mouse_pos[1] // TILE_SIZE
+        for turret in turret_group:
+            if (mouse_tile_x, mouse_tile_y) == (turret.tile_x, turret.tile_y):
+                return turret
+
+    def clear_selection():
+        for turret in turret_group:
+            turret.selected = False
 
     # Create World
     world = World(world_data, map_image)
@@ -76,8 +89,13 @@ def main():
         # UPDATING SECTION
         #################################
 
-         # Update groups
+        # Update groups
         enemy_group.update()
+        turret_group.update()
+
+        # Highlight selected turret
+        if selected_turret:
+            selected_turret.selected = True
 
         #################################
         # DRAWING SECTION
@@ -90,7 +108,8 @@ def main():
 
         # Draws groups
         enemy_group.draw(screen)
-        turret_group.draw(screen)
+        for turret in turret_group:
+            turret.draw(screen)
 
         # Draw buttons
         if turret_button.draw(screen): # Button to buy the turrets
@@ -116,8 +135,13 @@ def main():
                 mouse_pos = pygame.mouse.get_pos()
                 # check if mouse is in the game area
                 if mouse_pos[0] < SCREEN_WIDTH and mouse_pos[0] < SCREEN_HIGHT:
+                    # Clear selected turrets
+                    selected_turret = None
+                    clear_selection()
                     if placing_turrets == True:
                         create_turret(mouse_pos)
+                    else:
+                        selected_turret = selected_turret(mouse_pos)
         
 
         # Rerenders above to screen at 60 FPS (Adjustable FPS)
