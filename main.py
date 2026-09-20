@@ -24,7 +24,12 @@ def main():
     # This is responsible for dealing with textures and images
     map_image = pygame.image.load('levels/level1.png').convert_alpha()
     # Turret Sprite Sheets
-    turret_sheet = pygame.image.load('assets/images/turrets/turret1.png').convert_alpha()
+    turret_spritesheets = []
+
+    for x in range(1, TURRET_LEVELS + 1):
+        turret_sheet = pygame.image.load(f'assets/images/turrets/turret{x}.png').convert_alpha()
+        turret_spritesheets.append(turret_sheet)
+    
     # individual turrets image for mouse cursor
     currsor_turret = pygame.image.load('assets/images/turrets/currsor_turret.png').convert_alpha()
     # enemys
@@ -32,6 +37,7 @@ def main():
     # The buttons to work the turrets
     buy_turret_image = pygame.image.load('assets/images/buttons/buy_button.png').convert_alpha()
     cancel_image = pygame.image.load('assets/images/buttons/cancel_button.png').convert_alpha()
+    upgrade_turret_image = pygame.image.load('assets/images/buttons/upgrade_turret_button.png').convert_alpha()
     
 
     # Load json data into level
@@ -51,7 +57,7 @@ def main():
                 if (mouse_tile_x, mouse_tile_y) == (turret.tile_x, turret.tile_y):
                     space_is_free = False
             if space_is_free == True:
-                new_turret = Turret(turret_sheet, mouse_tile_x, mouse_tile_y)
+                new_turret = Turret(turret_spritesheets, mouse_tile_x, mouse_tile_y)
                 turret_group.add(new_turret)
 
     def select_turret(mouse_pos):
@@ -79,6 +85,7 @@ def main():
     # Create the Buttons
     turret_button = Button(SCREEN_WIDTH + 30, 120, buy_turret_image, True)
     cancel_button = Button(SCREEN_WIDTH + 50, 180, cancel_image, True)
+    upgrade_button = Button(SCREEN_WIDTH + 5, 180, upgrade_turret_image, True)
 
 
     # This will be the game Loop
@@ -125,6 +132,12 @@ def main():
                 screen.blit(currsor_turret, currsor_rect)
             if cancel_button.draw(screen): # Button to stop buying
                 placing_turrets = False
+
+        # Show upgrade button if selected
+        if selected_turret:
+            if selected_turret.upgrade_level < TURRET_LEVELS:
+                if upgrade_button.draw(screen):
+                    selected_turret.upgrade()
 
         # Accounts for events that happen in game
         for event in pygame.event.get():
