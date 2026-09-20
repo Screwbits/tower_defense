@@ -54,7 +54,7 @@ def main():
                 new_turret = Turret(turret_sheet, mouse_tile_x, mouse_tile_y)
                 turret_group.add(new_turret)
 
-    def selected_turret(mouse_pos):
+    def select_turret(mouse_pos):
         mouse_tile_x = mouse_pos[0] // TILE_SIZE
         mouse_tile_y = mouse_pos[1] // TILE_SIZE
         for turret in turret_group:
@@ -91,7 +91,7 @@ def main():
 
         # Update groups
         enemy_group.update()
-        turret_group.update()
+        turret_group.update(enemy_group)
 
         # Highlight selected turret
         if selected_turret:
@@ -141,7 +141,7 @@ def main():
                     if placing_turrets == True:
                         create_turret(mouse_pos)
                     else:
-                        selected_turret = selected_turret(mouse_pos)
+                        selected_turret = select_turret(mouse_pos)
         
 
         # Rerenders above to screen at 60 FPS (Adjustable FPS)
