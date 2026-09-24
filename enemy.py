@@ -33,6 +33,7 @@ class Enemy(pygame.sprite.Sprite):
         	# Enemy has reached end of the path
             self.kill()
             world.health -= 1
+            world.missed_enemies += 1
 
 		# Calculate distance to target
         dist = self.movement.length()
@@ -58,5 +59,6 @@ class Enemy(pygame.sprite.Sprite):
 
     def check_alive(self, world):
         if self.health <= 0:
+            world.killed_enemies += 1
             world.money += c.KILL_REWARD
             self.kill()

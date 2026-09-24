@@ -14,6 +14,8 @@ class World():
         self.image = map_image
         self.enemy_list = []
         self.spawned_enemies = 0
+        self.killed_enemies = 0
+        self.missed_enemies = 0
 
     def process_data(self):
 		# Look through data to extract relevant info
@@ -41,6 +43,18 @@ class World():
 
         # Makes it so the enemies come out randomly
         random.shuffle(self.enemy_list)
+
+    def check_level_complete(self):
+        if (self.killed_enemies + self.missed_enemies) == len(self.enemy_list):
+            return True
+
+    def reset_level(self):
+        # Reset enemy variables
+        self.enemy_list = []
+        self.spawned_enemies = 0
+        self.killed_enemies = 0
+        self.missed_enemies = 0
+        
 
     def draw(self, surface):
         surface.blit(self.image, (0, 0)) # Cordnates to start drawing from
