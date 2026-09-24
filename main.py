@@ -18,6 +18,7 @@ def main():
     pygame.display.set_caption("Tower Defense")
 
     # Game Variables
+    last_enemy_spawn = pygame.time.get_ticks()
     placing_turrets = False
     selected_turret = None
 
@@ -32,7 +33,13 @@ def main():
     
     # individual turrets image for mouse cursor
     currsor_turret = pygame.image.load('assets/images/turrets/currsor_turret.png').convert_alpha()
-    # enemys
+    # enemies
+    enemy_images = {
+        "weak": pygame.image.load('assets/images/enemies/enemy1.png').convert_alpha(),
+        "medium": pygame.image.load('assets/images/enemies/enemy2.png').convert_alpha(),
+        "strong": pygame.image.load('assets/images/enemies/enemy3.png').convert_alpha(),
+        "elite": pygame.image.load('assets/images/enemies/enemy4.png').convert_alpha()
+    }
     enemy_image = pygame.image.load('assets/images/enemies/enemy1.png').convert_alpha()
     # The buttons to work the turrets
     buy_turret_image = pygame.image.load('assets/images/buttons/buy_button.png').convert_alpha()
@@ -74,13 +81,13 @@ def main():
     # Create World
     world = World(world_data, map_image)
     world.process_data()
+    world.process_enemies()
 
 
     # This will hold the groups that contain all the sprites (objects)
     enemy_group = pygame.sprite.Group()
     turret_group = pygame.sprite.Group()
-    enemy = Enemy(world.waypoints, enemy_image)
-    enemy_group.add(enemy)
+
 
     # Create the Buttons
     turret_button = Button(SCREEN_WIDTH + 30, 120, buy_turret_image, True)
@@ -117,6 +124,15 @@ def main():
         enemy_group.draw(screen)
         for turret in turret_group:
             turret.draw(screen)
+
+        # Spawn Enemies
+        if pygame.time.get_ticks() - last_enemy_spawn > SPAWN_COOLDOWN:
+            if world.spawned_enemies < len(world.enemy_list):
+                enemy_type = world.enemy_list[world.spawned_enemies]
+                enemy = Enemy(enemy_type, world.waypoints, enemy_images)
+                enemy_group.add(enemy)
+                world.spawned_enemies += 1
+                last_enemy_spawn = pygame.time.get_ticks()
 
         # Draw buttons
         if turret_button.draw(screen): # Button to buy the turrets
