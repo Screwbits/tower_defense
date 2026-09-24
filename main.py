@@ -51,6 +51,15 @@ def main():
     with open('levels/level1.tmj') as file:
         world_data = json.load(file)
 
+    # Load fonts for displaying text on screen
+    text_font = pygame.font.SysFont("Consolas", 24, bold = True)
+    large_font = pygame.font.SysFont("Consolas", 36)
+
+    # Function for outputting text onto window screen
+    def draw_text(text, font, text_color, x, y):
+        img = font.render(text, True, text_color)
+        screen.blit(img, (x, y))
+
     def create_turret(mouse_pos):
         mouse_tile_x = mouse_pos[0] // TILE_SIZE
         mouse_tile_y = mouse_pos[1] // TILE_SIZE
@@ -66,6 +75,8 @@ def main():
             if space_is_free == True:
                 new_turret = Turret(turret_spritesheets, mouse_tile_x, mouse_tile_y)
                 turret_group.add(new_turret)
+                # Deduct cost of turret
+                world.money -= BUY_COST
 
     def select_turret(mouse_pos):
         mouse_tile_x = mouse_pos[0] // TILE_SIZE
@@ -104,7 +115,7 @@ def main():
         #################################
 
         # Update groups
-        enemy_group.update()
+        enemy_group.update(world)
         turret_group.update(enemy_group)
 
         # Highlight selected turret
@@ -124,6 +135,9 @@ def main():
         enemy_group.draw(screen)
         for turret in turret_group:
             turret.draw(screen)
+
+        draw_text(str(world.health), text_font, "grey100", 0, 0)
+        draw_text(str(world.money), text_font, "grey100", 0, 30)
 
         # Spawn Enemies
         if pygame.time.get_ticks() - last_enemy_spawn > SPAWN_COOLDOWN:
@@ -153,7 +167,9 @@ def main():
         if selected_turret:
             if selected_turret.upgrade_level < TURRET_LEVELS:
                 if upgrade_button.draw(screen):
-                    selected_turret.upgrade()
+                    if world.money >= UPGRADE_COST:
+                        selected_turret.upgrade()
+                        world.money -= UPGRADE_COST
 
         # Accounts for events that happen in game
         for event in pygame.event.get():
@@ -168,7 +184,9 @@ def main():
                     selected_turret = None
                     clear_selection()
                     if placing_turrets == True:
-                        create_turret(mouse_pos)
+                        # Check if you have the money to place turrets
+                        if world.money >= BUY_COST:
+                            create_turret(mouse_pos)
                     else:
                         selected_turret = select_turret(mouse_pos)
         

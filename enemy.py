@@ -1,6 +1,7 @@
 import pygame
 from pygame.math import Vector2
 import math
+import constants as c
 from enemy_data import ENEMY_DATA
 
 # inherets functionality from pygame.sprite
@@ -10,7 +11,7 @@ class Enemy(pygame.sprite.Sprite):
         self.waypoints = waypoints
         self.pos = Vector2(waypoints[0])
         self.target_waypoint = 1
-        self.heath = ENEMY_DATA.get(enemy_type)["health"]
+        self.health = ENEMY_DATA.get(enemy_type)["health"]
         self.speed = ENEMY_DATA.get(enemy_type)["speed"]
         self.angle = 0
         self.original_image = images.get(enemy_type)
@@ -18,11 +19,12 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
 
-    def update(self):
-        self.move()
+    def update(self, world):
+        self.move(world)
         self.rotate()
+        self.check_alive(world)
 
-    def move(self):
+    def move(self, world):
         # Define a target waypoint
         if self.target_waypoint < len(self.waypoints):
         	self.target = Vector2(self.waypoints[self.target_waypoint])
@@ -30,6 +32,7 @@ class Enemy(pygame.sprite.Sprite):
         else:
         	# Enemy has reached end of the path
             self.kill()
+            world.health -= 1
 
 		# Calculate distance to target
         dist = self.movement.length()
@@ -52,3 +55,8 @@ class Enemy(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(self.original_image, self.angle)
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
+
+    def check_alive(self, world):
+        if self.health <= 0:
+            world.money += c.KILL_REWARD
+            self.kill()
