@@ -50,7 +50,15 @@ def main():
     upgrade_turret_image = pygame.image.load('assets/images/buttons/upgrade_turret_button.png').convert_alpha()
     begin_image = pygame.image.load('assets/images/buttons/new_wave_button.png').convert_alpha()
     restart_image = pygame.image.load('assets/images/buttons/restart_button.png').convert_alpha()
+    fast_forward_image = pygame.image.load('assets/images/buttons/fast_forward_button.png').convert_alpha()
+    # GUI
+    heart_image = pygame.image.load('assets/images/gui/heart.png').convert_alpha()
+    money_image = pygame.image.load('assets/images/gui/money.png').convert_alpha()
+    logo_image = pygame.image.load('assets/images/gui/logo.png').convert_alpha()
     
+    # load sound
+    shot_fx = pygame.mixer.Sound('assets/audio/royalty_free_canon.wav')
+    shot_fx.set_volume(0.5)
 
     # Load json data into level
     with open('levels/level1.tmj') as file:
@@ -65,6 +73,19 @@ def main():
         img = font.render(text, True, text_color)
         screen.blit(img, (x, y))
 
+    # Holds all the data to build a display panel
+    def display_panel():
+        # Main body of panel
+        pygame.draw.rect(screen, "aquamarine", (SCREEN_WIDTH, 0, SIDE_PANEL, SCREEN_HIGHT))
+        pygame.draw.rect(screen, "grey0", (SCREEN_WIDTH, 0, SIDE_PANEL, 400), 5)
+        screen.blit(logo_image, (SCREEN_WIDTH, 400))
+        # Information the panel holds
+        draw_text("WAVE: " + str(world.level), text_font, "grey10", SCREEN_WIDTH + 10, 10)
+        screen.blit(heart_image, (SCREEN_WIDTH + 10, 35))
+        draw_text(str(world.health), text_font, "grey10", SCREEN_WIDTH + 50, 40)
+        screen.blit(money_image, (SCREEN_WIDTH + 10, 65))
+        draw_text(str(world.money), text_font, "grey10", SCREEN_WIDTH + 50, 70)
+
     def create_turret(mouse_pos):
         mouse_tile_x = mouse_pos[0] // TILE_SIZE
         mouse_tile_y = mouse_pos[1] // TILE_SIZE
@@ -78,7 +99,7 @@ def main():
                 if (mouse_tile_x, mouse_tile_y) == (turret.tile_x, turret.tile_y):
                     space_is_free = False
             if space_is_free == True:
-                new_turret = Turret(turret_spritesheets, mouse_tile_x, mouse_tile_y)
+                new_turret = Turret(turret_spritesheets, mouse_tile_x, mouse_tile_y, shot_fx)
                 turret_group.add(new_turret)
                 # Deduct cost of turret
                 world.money -= BUY_COST
@@ -111,6 +132,7 @@ def main():
     upgrade_button = Button(SCREEN_WIDTH + 5, 180, upgrade_turret_image, True)
     begin_button = Button(SCREEN_WIDTH + 60, 300, begin_image, True)
     restart_button = Button(310, 300, restart_image, True)
+    fast_forward_button = Button(SCREEN_WIDTH + 55, 300, fast_forward_image, False)
 
 
     # This will be the game Loop
@@ -133,7 +155,7 @@ def main():
 
             # Update groups
             enemy_group.update(world)
-            turret_group.update(enemy_group)
+            turret_group.update(enemy_group, world)
 
             # Highlight selected turret
             if selected_turret:
@@ -143,8 +165,6 @@ def main():
         # DRAWING SECTION
         #################################
 
-        screen.fill((1, 0, 200))
-
         # Background rendered first
         world.draw(screen) # put after screen.fill()
 
@@ -153,9 +173,8 @@ def main():
         for turret in turret_group:
             turret.draw(screen)
 
-        draw_text(str(world.health), text_font, "grey100", 0, 0)
-        draw_text(str(world.money), text_font, "grey100", 0, 30)
-        draw_text(str(world.level), text_font, "grey100", 0, 60)
+        # Has all the data to build a display panel
+        display_panel()
 
         if game_over == False:
             # Check if the level has been started or not
@@ -163,6 +182,10 @@ def main():
                 if begin_button.draw(screen):
                     level_started = True
             else:
+                # fast forward option here
+                world.game_speed = 1
+                if fast_forward_button.draw(screen):
+                    world.game_speed = 2
                 # Spawn Enemies
                 if pygame.time.get_ticks() - last_enemy_spawn > SPAWN_COOLDOWN:
                     if world.spawned_enemies < len(world.enemy_list):
@@ -182,6 +205,10 @@ def main():
                 world.process_enemies()
 
             # Draw buttons
+            #--------------------------------------------------
+            # Print out text for how much the turret costs
+            screen.blit(money_image, (SCREEN_WIDTH + 140, 120))
+            draw_text(str(BUY_COST), text_font, "grey10", SCREEN_WIDTH + 95, 125)
             if turret_button.draw(screen): # Button to buy the turrets
                 placing_turrets = True
             
@@ -199,6 +226,9 @@ def main():
             # Show upgrade button if selected
             if selected_turret:
                 if selected_turret.upgrade_level < TURRET_LEVELS:
+                    # Show the cost for the upgrade
+                    screen.blit(money_image, (SCREEN_WIDTH + 160, 180))
+                    draw_text(str(UPGRADE_COST), text_font, "grey10", SCREEN_WIDTH + 115, 185)
                     if upgrade_button.draw(screen):
                         if world.money >= UPGRADE_COST:
                             selected_turret.upgrade()

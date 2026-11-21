@@ -38,8 +38,8 @@ class Enemy(pygame.sprite.Sprite):
 		# Calculate distance to target
         dist = self.movement.length()
 		# Check if remaining distance is greater than enemey speed
-        if dist >= self.speed:
-            self.pos += self.movement.normalize() * self.speed # Does the trianometry work
+        if dist >= (self.speed * world.game_speed):
+            self.pos += self.movement.normalize() * (self.speed * world.game_speed) # Does the trianometry work
         else:
             if dist != 0:
                 self.pos += self.movement.normalize() * dist
